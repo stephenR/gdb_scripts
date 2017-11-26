@@ -40,8 +40,18 @@ class HeapTracer(object):
         super(HeapTracer, self).__init__()
 
     def trace(self, fn_name, args, ret_val):
-        gdb.write('{}({}) = {}\n'.format(fn_name,
-            ', '.join(str(arg) for arg in args), ret_val))
+        def val_to_str(val):
+            str_val = str(val)
+            try:
+                str_val = '0x{:x}'.format(int(str_val))
+            except:
+                pass
+            return str_val
+        str_args = map(val_to_str, args)
+        output = '{}({})'.format(fn_name, ', '.join(str_args))
+        if ret_val is not None:
+            output += ' = {}'.format(ret_val)
+        gdb.write(output + '\n')
 
 class HeapTracing(gdb.Command):
     def __init__(self):
